@@ -102,14 +102,45 @@
   margin: 0.25rem 0;
 }
 
-.wfm-error {
-  text-align: center;
-  padding: 2rem;
+.wfm-banner {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  margin-bottom: 0.75rem;
+}
+
+.wfm-banner--error {
+  background: rgba(255, 107, 107, 0.15);
+  border: 1px solid rgba(255, 107, 107, 0.4);
   color: #ff6b6b;
 }
 
-.wfm-error h2 {
+.wfm-camera-error {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.85);
+  z-index: 10;
+  color: #ccc;
+  padding: 2rem;
+  text-align: center;
+}
+
+.wfm-camera-error h2 {
+  color: #ff6b6b;
   margin: 0 0 0.5rem;
+  font-size: 1.25rem;
+}
+
+.wfm-camera-error p {
+  margin: 0 0 1rem;
+  color: #aaa;
+  font-size: 0.9rem;
+  max-width: 400px;
 }
 
 /* Score cards */

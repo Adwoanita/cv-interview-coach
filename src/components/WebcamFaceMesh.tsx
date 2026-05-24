@@ -27,7 +27,12 @@ const POSE_CONNECTIONS: [number, number][] = [
 const LOG_INTERVAL_MS = 1000;
 
 export function WebcamFaceMesh() {
-  const { videoRef, error: webcamError, isReady: webcamReady } = useWebcam();
+  const {
+    videoRef,
+    error: webcamError,
+    isReady: webcamReady,
+    retry: retryWebcam,
+  } = useWebcam();
   const {
     landmarker: faceLandmarker,
     isLoading: faceLoading,
@@ -60,7 +65,6 @@ export function WebcamFaceMesh() {
       // Draw pose skeleton and keypoints
       if (poseResults && poseResults.landmarks.length > 0) {
         for (const landmarks of poseResults.landmarks) {
-          // Draw connections
           ctx.strokeStyle = POSE_LINE_COLOR;
           ctx.lineWidth = POSE_LINE_WIDTH;
           for (const [i, j] of POSE_CONNECTIONS) {
@@ -78,7 +82,6 @@ export function WebcamFaceMesh() {
             }
           }
 
-          // Draw keypoints
           for (const point of landmarks) {
             if ((point.visibility ?? 0) > 0.5) {
               ctx.beginPath();
@@ -148,17 +151,14 @@ export function WebcamFaceMesh() {
 
         const now = performance.now();
 
-        // Run both detectors
         const faceResults = faceLandmarker.detectForVideo(video, now);
         const poseResults = poseLandmarker.detectForVideo(video, now);
 
         drawFrame(ctx, faceResults, poseResults);
 
-        // Update counters
         setFaceCount(faceResults.faceLandmarks.length);
         setPoseDetected(poseResults.landmarks.length > 0);
 
-        // FPS calculation
         frameCount++;
         const elapsed = now - lastTime;
         if (elapsed >= 1000) {
@@ -168,7 +168,6 @@ export function WebcamFaceMesh() {
           lastTime = now;
         }
 
-        // Build Contract 2 JSON and log raw coordinates (throttled)
         if (now - lastLogRef.current >= LOG_INTERVAL_MS) {
           lastLogRef.current = now;
           const output = buildContract2(faceResults, poseResults, currentFps);
@@ -203,17 +202,8 @@ export function WebcamFaceMesh() {
     drawFrame,
   ]);
 
-  const error = webcamError || faceError || poseError;
+  const modelError = faceError || poseError;
   const modelsLoading = faceLoading || poseLoading;
-
-  if (error) {
-    return (
-      <div className="wfm-error">
-        <h2>Error</h2>
-        <p>{error}</p>
-      </div>
-    );
-  }
 
   return (
     <div className="wfm-container">
@@ -236,14 +226,28 @@ export function WebcamFaceMesh() {
         </div>
       </div>
 
+      {modelError && (
+        <div className="wfm-banner wfm-banner--error">
+          Model error: {modelError}
+        </div>
+      )}
+
       <div className="wfm-video-wrap">
-        {(modelsLoading || !webcamReady) && (
+        {webcamError ? (
+          <div className="wfm-camera-error">
+            <h2>Camera Unavailable</h2>
+            <p>{webcamError}</p>
+            <button type="button" className="wfm-btn" onClick={retryWebcam}>
+              Retry Camera
+            </button>
+          </div>
+        ) : (modelsLoading || !webcamReady) ? (
           <div className="wfm-loading">
             {!webcamReady && <p>Starting webcam…</p>}
             {faceLoading && <p>Loading Face Mesh model…</p>}
             {poseLoading && <p>Loading Pose model…</p>}
           </div>
-        )}
+        ) : null}
         <video
           ref={videoRef}
           className="wfm-video"
