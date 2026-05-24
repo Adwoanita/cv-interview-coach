@@ -58,7 +58,7 @@
   font-size: 0.85rem;
   color: #aaa;
   font-variant-numeric: tabular-nums;
-  min-width: 5rem;
+  min-width: 4.5rem;
 }
 
 .wfm-video-wrap {
@@ -102,12 +102,99 @@
   margin: 0.25rem 0;
 }
 
-.wfm-error {
-  text-align: center;
-  padding: 2rem;
+.wfm-banner {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  margin-bottom: 0.75rem;
+}
+
+.wfm-banner--error {
+  background: rgba(255, 107, 107, 0.15);
+  border: 1px solid rgba(255, 107, 107, 0.4);
   color: #ff6b6b;
 }
 
-.wfm-error h2 {
+.wfm-camera-error {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.85);
+  z-index: 10;
+  color: #ccc;
+  padding: 2rem;
+  text-align: center;
+}
+
+.wfm-camera-error h2 {
+  color: #ff6b6b;
   margin: 0 0 0.5rem;
+  font-size: 1.25rem;
+}
+
+.wfm-camera-error p {
+  margin: 0 0 1rem;
+  color: #aaa;
+  font-size: 0.9rem;
+  max-width: 400px;
+}
+
+/* Score cards */
+.wfm-scores {
+  display: flex;
+  gap: 1rem;
+  width: 100%;
+  margin-top: 1rem;
+  flex-wrap: wrap;
+}
+
+.wfm-score-card {
+  flex: 1 1 0;
+  min-width: 180px;
+  background: #222;
+  border: 1px solid #333;
+  border-radius: 8px;
+  padding: 1rem;
+  text-align: center;
+}
+
+.wfm-score-card h3 {
+  margin: 0 0 0.5rem;
+  font-size: 0.9rem;
+  color: #aaa;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.wfm-score-value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #00ff88;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+}
+
+.wfm-score-value--large {
+  font-size: 2.5rem;
+}
+
+.wfm-score-detail {
+  font-size: 0.75rem;
+  color: #888;
+  margin-top: 0.25rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.wfm-score-card--composite {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-color: #00ff88;
+  background: #1a2a1f;
 }

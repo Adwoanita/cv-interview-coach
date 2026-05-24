@@ -1,10 +1,11 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 export interface WebcamState {
   videoRef: React.RefObject<HTMLVideoElement | null>;
   stream: MediaStream | null;
   error: string | null;
   isReady: boolean;
+  retry: () => void;
 }
 
 export function useWebcam(): WebcamState {
@@ -12,10 +13,20 @@ export function useWebcam(): WebcamState {
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isReady, setIsReady] = useState(false);
+  const [attempt, setAttempt] = useState(0);
+  const streamRef = useRef<MediaStream | null>(null);
+
+  const retry = useCallback(() => {
+    setError(null);
+    setIsReady(false);
+    streamRef.current?.getTracks().forEach((t) => t.stop());
+    streamRef.current = null;
+    setStream(null);
+    setAttempt((a) => a + 1);
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
-    let currentStream: MediaStream | null = null;
 
     async function start() {
       try {
@@ -29,7 +40,7 @@ export function useWebcam(): WebcamState {
           return;
         }
 
-        currentStream = mediaStream;
+        streamRef.current = mediaStream;
         setStream(mediaStream);
 
         if (videoRef.current) {
@@ -40,8 +51,26 @@ export function useWebcam(): WebcamState {
         }
       } catch (err) {
         if (!cancelled) {
-          const msg =
-            err instanceof Error ? err.message : "Failed to access webcam";
+          let msg = "Failed to access webcam";
+          if (err instanceof DOMException) {
+            switch (err.name) {
+              case "NotFoundError":
+                msg = "No camera found. Please connect a webcam and try again.";
+                break;
+              case "NotAllowedError":
+                msg =
+                  "Camera access denied. Please allow camera access in your browser settings and try again.";
+                break;
+              case "NotReadableError":
+                msg =
+                  "Camera is in use by another application. Close it and try again.";
+                break;
+              default:
+                msg = `Camera error: ${err.message}`;
+            }
+          } else if (err instanceof Error) {
+            msg = err.message;
+          }
           setError(msg);
         }
       }
@@ -51,9 +80,9 @@ export function useWebcam(): WebcamState {
 
     return () => {
       cancelled = true;
-      currentStream?.getTracks().forEach((t) => t.stop());
+      streamRef.current?.getTracks().forEach((t) => t.stop());
     };
-  }, []);
+  }, [attempt]);
 
-  return { videoRef, stream, error, isReady };
+  return { videoRef, stream, error, isReady, retry };
 }
